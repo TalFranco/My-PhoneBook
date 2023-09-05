@@ -60,49 +60,50 @@ export default function EditOrAdd() {
   const [user, setUser] = useState(existingUser);
 
   const handleSave = () => {
-    if (isEdit) {
-      // Handle editing existing user
-      axios
-        .put(`${serverURL}/${user.id}`, { action: "edit", user })
-        .then((response) => {
-          setUsers(response.data.users);
-          Alert.alert(
-            "Success!",
-            "User updated successfully.",
-            [
-              {
-                text: "OK",
-                onPress: () => {
-                  navigation.goBack();
-                },
-              },
-            ],
-            { cancelable: false }
-          );
-        })
-        .catch((error) => {
-          console.error("Error updating user:", error);
-        });
+    if (
+      !user.name ||
+      !user.username ||
+      !user.email ||
+      !user.phone ||
+      !user.website ||
+      !user.address.street ||
+      !user.address.city ||
+      !user.company.name
+    ) {
+      Alert.alert(
+        "Validation Error",
+        "Please fill in all required fields.",
+        [{ text: "OK", onPress: () => {} }],
+        { cancelable: false }
+      );
+      return; // Exit the function if any required field is empty
     } else {
-      // Handle adding a new user
-      if (
-        !user.name ||
-        !user.username ||
-        !user.email ||
-        !user.phone ||
-        !user.website ||
-        !user.address.street ||
-        !user.address.city ||
-        !user.company.name
-      ) {
-        Alert.alert(
-          "Validation Error",
-          "Please fill in all required fields.",
-          [{ text: "OK", onPress: () => {} }],
-          { cancelable: false }
-        );
-        return; // Exit the function if any required field is empty
+      if (isEdit) {
+        // Handle editing existing user
+        axios
+          .put(`${serverURL}/${user.id}`, { action: "edit", user })
+          .then((response) => {
+            setUsers(response.data.users);
+            Alert.alert(
+              "Success!",
+              "User updated successfully.",
+              [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    navigation.goBack();
+                  },
+                },
+              ],
+              { cancelable: false }
+            );
+          })
+          .catch((error) => {
+            console.error("Error updating user:", error);
+          });
       } else {
+        // Handle adding a new user
+
         axios
           .post(serverURL, { action: "add", user })
           .then((response) => {
@@ -195,7 +196,10 @@ export default function EditOrAdd() {
             <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
           {isEdit && ( // Render Cancel button only in edit mode
-            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleCancel}
+            >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           )}
