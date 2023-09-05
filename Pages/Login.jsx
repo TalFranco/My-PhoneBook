@@ -6,14 +6,16 @@ import {
   TextInput,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import axios from "axios";
 import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useUserContext } from "../useUserContext";
+
 
 export default function Login() {
   const navigation = useNavigation();
-  const serverURL = "http://192.168.1.109:8000/server.php";
+  const { serverURL} = useUserContext();
 
   //user info
   const [userEmail, setUserEmail] = useState("");

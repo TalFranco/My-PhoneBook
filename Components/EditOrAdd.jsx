@@ -37,11 +37,10 @@ function CustomTextInput({
 
 export default function EditOrAdd() {
   /// this component is for edit user or add new one
-  const serverURL = "http://192.168.1.109:8000/server.php";
-  const { setUsers } = useUserContext();
+  const { setUsers, serverURL } = useUserContext();
   const navigation = useNavigation();
   const route = useRoute();
-  /// here im checking if the user want to rdeit or add new user
+  /// here im checking if the user want to edit or add new user
   const isEdit = route.params?.isEdit || false;
   const existingUser = route.params?.user || {
     name: "",
@@ -86,28 +85,53 @@ export default function EditOrAdd() {
         });
     } else {
       // Handle adding a new user
-      axios
-        .post(serverURL, { action: "add", user })
-        .then((response) => {
-          setUsers(response.data.users);
-          Alert.alert(
-            "Success!",
-            "User added successfully.",
-            [
-              {
-                text: "OK",
-                onPress: () => {
-                  navigation.goBack();
+      if (
+        !user.name ||
+        !user.username ||
+        !user.email ||
+        !user.phone ||
+        !user.website ||
+        !user.address.street ||
+        !user.address.city ||
+        !user.company.name
+      ) {
+        Alert.alert(
+          "Validation Error",
+          "Please fill in all required fields.",
+          [{ text: "OK", onPress: () => {} }],
+          { cancelable: false }
+        );
+        return; // Exit the function if any required field is empty
+      } else {
+        axios
+          .post(serverURL, { action: "add", user })
+          .then((response) => {
+            setUsers(response.data.users);
+            Alert.alert(
+              "Success!",
+              "User added successfully.",
+              [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    navigation.goBack();
+                  },
                 },
-              },
-            ],
-            { cancelable: false }
-          );
-        })
-        .catch((error) => {
-          console.error("Error creating user:", error);
-        });
+              ],
+              { cancelable: false }
+            );
+          })
+          .catch((error) => {
+            console.error("Error creating user:", error);
+          });
+      }
     }
+  };
+
+  // Handle cancel button press for edit mode
+  const handleCancel = () => {
+    // You can navigate back or take any other action here
+    navigation.goBack();
   };
 
   return (
@@ -170,6 +194,11 @@ export default function EditOrAdd() {
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
+          {isEdit && ( // Render Cancel button only in edit mode
+            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
     </KeyboardAwareScrollView>
@@ -227,6 +256,18 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   saveButtonText: {
+    fontSize: 18,
+    color: "#FFFFFF",
+  },
+  cancelButton: {
+    backgroundColor: "#FF0000", // Red color for the cancel button
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  cancelButtonText: {
     fontSize: 18,
     color: "#FFFFFF",
   },

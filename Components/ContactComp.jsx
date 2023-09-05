@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Linking,
+  Alert, // Import Alert from react-native
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
@@ -13,8 +14,7 @@ import { useUserContext } from "../useUserContext";
 
 export default function ContactComp({ user }) {
   const navigation = useNavigation();
-  const serverURL = "http://192.168.1.109:8000/server.php";
-  const { setUsers } = useUserContext();
+  const { setUsers, serverURL } = useUserContext();
 
   const handlePhoneNumberPress = async () => {
     // when phone icon press
@@ -29,20 +29,38 @@ export default function ContactComp({ user }) {
   };
 
   const handleDeletePress = async () => {
-    // when delete press
-    try {
-      // Send a DELETE request to the server with the user's ID
-      const response = await axios.delete(`${serverURL}?id=${user.id}`);
+    // Show a confirmation dialog before deleting
+    Alert.alert(
+      "Confirm Deletion",
+      "Are you sure you want to delete this contact?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            // Proceed with deletion
+            try {
+              // Send a DELETE request to the server with the user's ID
+              const response = await axios.delete(`${serverURL}?id=${user.id}`);
 
-      if (response.status === 200) {
-        console.log("User deleted successfully");
-        setUsers(response.data);
-      } else {
-        console.error("Error deleting user:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
+              if (response.status === 200) {
+                console.log("User deleted successfully");
+                setUsers(response.data);
+              } else {
+                console.error("Error deleting user:", response.statusText);
+              }
+            } catch (error) {
+              console.error("Error deleting user:", error);
+            }
+          },
+          style: "destructive", // This makes the text color red
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   return (

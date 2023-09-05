@@ -5,9 +5,9 @@ const UserContext = createContext();
 
 export function UserProvider({ children }) {
   const [users, setUsers] = useState([]);
+  const serverURL = "http://192.168.1.109:8000/server.php";
 
   useEffect(() => {
-    const serverURL = "http://192.168.1.109:8000/server.php";
 
     axios
       .get(`${serverURL}?req=contacts`)
@@ -24,7 +24,7 @@ export function UserProvider({ children }) {
   }, []); 
 
   return (
-    <UserContext.Provider value={{ users, setUsers }}>
+    <UserContext.Provider value={{ users, setUsers,serverURL }}>
       {children}
     </UserContext.Provider>
   );
